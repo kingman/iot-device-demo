@@ -1,0 +1,7 @@
+*.pyc
+*.pem
+env/
+expriment.sh
+create_bind_devices.sh
+devices_simulator.py
+functions/state_update/
