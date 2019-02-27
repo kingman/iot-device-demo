@@ -1,5 +1,5 @@
 const {Logging} = require('@google-cloud/logging');
-const projectId = 'ota-iot-231619';
+const projectId = '<project_id>';
 
 const logging = new Logging({projectId});
 exports.monitorLogging = (event, context) => {

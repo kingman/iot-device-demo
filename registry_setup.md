@@ -87,18 +87,38 @@ gcloud beta functions deploy logging \
 --memory 128mb
 ```
 ## Create cloud function for storing events in Firestore
-```bash 
-TODO
-```
-## Create cloud function for storing state in Firestore
-```bash 
-TODO
-```
-
-## Create cloud function for sending Firestore updates to device
 ```bash
 TODO
 ```
+
+## Create cloud function for storing events in Firestore
+```bash
+cd functions/event_update
+```
+Substitute the real project id with the `<project_id>` place holder in `index.js`
+```bash
+gcloud beta functions deploy eventUpdate \
+--region $REGION \
+--trigger-topic $LOG_TOPIC \
+--runtime nodejs8 \
+--memory 128mb
+```
+
+## Create cloud function for monitor Logging
+```bash
+cd functions/monitor_logging
+```
+Substitute the real project id with the `<project_id>` place holder in `index.js`
+```bash
+gcloud beta functions deploy monitorLogging \
+--region $REGION \
+--trigger-topic $LOG_TOPIC \
+--runtime nodejs8 \
+--memory 128mb
+```
+
+## Create cloud function for sending Firestore updates to device
+see setup instruction under `functions/firestore_update`
 
 ## Create cloud function for propegating device creation
 ```bash
@@ -113,12 +133,12 @@ TODO - SIMULATOR
 Brows to [Cloud Functions Console](https://console.cloud.google.com/functions) and click on the `logging` function. Under 'logging' function click on `VIEW LOGS` to access the function log. Refresh the log and verify that connected message appears in the log.
 
 ## View Your udpates in Firestore
-Go to Firestore in the GCP Console. Find your device in the devices list. 
+Go to Firestore in the GCP Console. Find your device in the devices list.
 
 Try sending some data from the simulator - you should Firestore update instantly.
 
 ## Send information from Firestore
-This represents an app sending data down to devices. Usually an SDK would write from a mobile app to Firestore. 
+This represents an app sending data down to devices. Usually an SDK would write from a mobile app to Firestore.
 
 Also in the document for your device in Firestore, navigate to the config collection and try updating one of the fields under state.
 
