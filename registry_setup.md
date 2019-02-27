@@ -134,3 +134,46 @@ TODO
 
 ## Test secure communicaiton
 We have added an ACL field to the firestore document which can contain an email, if set only a user signed in with this email would be to udpate and view these fields.
+
+---
+
+# Setup device logging
+IoT Core can write device activity information to Stakdrvier logging for you.
+
+## Turn on logging for your registry
+1. Go to your IoT Core registry
+2. Click "Edit Registry"
+3. Set "Logging Level" to "Info"
+
+## Try it out
+Restart your device simulator. Now go to Stackdriver Logging and see the device events.
+
+# Custom Logging
+You can also use the IoT Core event channel to send custom logs from the device and have them appear in stack driver
+
+## Create cloud function for sending logs to Stackdriver
+```bash
+TODO
+```
+## Try out custom logging
+Use the simulator to send a log
+
+```log INFO "testing"```
+
+Check to see if it appears in Stackdriver
+
+# Alerting on Logs
+It's easy to create systems which raise alarms when certain log events occur. Simply deploy a CF which watches Stackdriver.
+
+## Create cloud function to alert from stackdriver
+```bash
+TODO
+```
+
+# Agregate Monitoring
+IoT Core roles up certain monitoring data for you, in the GCP console.
+
+## View registry monitoring
+Go to your IoT Core registry and click on the monitoring tab - you should be able to see devices connect, bytes uysed, and more.
+
+----
