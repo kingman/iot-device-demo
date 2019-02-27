@@ -86,10 +86,6 @@ gcloud beta functions deploy logging \
 --runtime nodejs8 \
 --memory 128mb
 ```
-## Create cloud function for storing events in Firestore
-```bash
-TODO
-```
 
 ## Create cloud function for storing events in Firestore
 ```bash
@@ -104,21 +100,21 @@ gcloud beta functions deploy eventUpdate \
 --memory 128mb
 ```
 
-## Create cloud function for monitor Logging
-```bash
-cd functions/monitor_logging
-```
-Substitute the real project id with the `<project_id>` place holder in `index.js`
-```bash
-gcloud beta functions deploy monitorLogging \
---region $REGION \
---trigger-topic $LOG_TOPIC \
---runtime nodejs8 \
---memory 128mb
-```
+
 
 ## Create cloud function for sending Firestore updates to device
-see setup instruction under `functions/firestore_update`
+```bash
+mkdir firestore_upate
+cd firestore_update
+npm install firebase-functions@latest firebase-admin@latest --save
+npm install -g firebase-tools
+firebase login
+firebase init functions
+```
+Override the `index.js`  functions with the one in this directory and also make sure to substitute `<project_d>` and  `<registry_id>`
+```bash
+firebase deploy --only functions
+```
 
 ## Create cloud function for propegating device creation
 ```bash
@@ -173,7 +169,15 @@ You can also use the IoT Core event channel to send custom logs from the device 
 
 ## Create cloud function for sending logs to Stackdriver
 ```bash
-TODO
+cd functions/monitor_logging
+```
+Substitute the real project id with the `<project_id>` place holder in `index.js`
+```bash
+gcloud beta functions deploy monitorLogging \
+--region $REGION \
+--trigger-topic $LOG_TOPIC \
+--runtime nodejs8 \
+--memory 128mb
 ```
 ## Try out custom logging
 Use the simulator to send a log
