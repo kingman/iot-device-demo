@@ -16,6 +16,9 @@ export DEVICE_PRIVATE_KEY=device_private.pem
 export DEVICE_PUBLIC_KEY=device_public.pem
 export CA_CERTS=roots.pem
 export ALGORITHM=RS256
+
+# Project Setup
+Run these commands to get IoT Core and other GCP services setup
 ```
 ## Create Pub/Sub topics
 ```bash
@@ -31,6 +34,10 @@ gcloud iot registries create $REGISTRY_ID \
 --event-notification-config=topic=$EVENT_TOPIC \
 --state-pubsub-topic=$STATE_TOPIC
 ```
+
+# Simulator Setup
+We will use a node.js device simulator. This will get it setup.
+
 ## Create Gateway key pair
 ```bash
 openssl genrsa -out $GATEWAY_PRIVATE_KEY 2048 && \
@@ -65,6 +72,11 @@ gcloud iot devices gateways bind \
 --gateway-region=$REGION \
 --gateway-registry=$REGISTRY_ID
 ```
+# TODO: KAVI - OTHER SETUP INSTRUCTIONS?
+
+# Deploy Communication Glue
+We have several Cloud Functions which help pass messages between systems. Deploy these first.
+
 ## Create cloud function for debugging device activity
 ```bash
 cd functions/logging
@@ -74,57 +86,38 @@ gcloud beta functions deploy logging \
 --runtime nodejs8 \
 --memory 128mb
 ```
-## Download root certificate
-```bash
-cd ../..
-curl https://pki.google.com/roots.pem > roots.pem
+## Create cloud function for storing events in Firestore
+```bash 
+TODO
 ```
+## Create cloud function for storing state in Firestore
+```bash 
+TODO
+```
+
+## Create cloud function for sending Firestore updates to device
+```bash
+TODO
+```
+
+## Create cloud function for propegating device creation
+```bash
+TODO
+```
+
+# Start using the communications flow
 ## Test communication flow
 ```bash
-virtualenv env && source env/bin/activate
-pip install -r requirements.txt
-python device_com_test.py
+TODO - SIMULATOR
 ```
 Brows to [Cloud Functions Console](https://console.cloud.google.com/functions) and click on the `logging` function. Under 'logging' function click on `VIEW LOGS` to access the function log. Refresh the log and verify that connected message appears in the log.
 
-## Change device through gateway authentication method
-```bash
-gcloud beta iot devices update $GATEWAY_ID \
---region=$REGION \
---registry=$REGISTRY_ID \
---auth-method=device-auth-token-only
-```
-Re-run the communication test script and verify the it fails with authentication error
-```bash
-python device_com_test.py
-```
-## Add public key to device
-```bash
-gcloud iot devices credentials create \
---path=$DEVICE_PUBLIC_KEY \
---type=rsa-pem \
---device="${DEVICE_PRE}1" \
---region=$REGION \
---registry=$REGISTRY_ID
-```
-## Use device auth token to communicate through gateway
-In `device_com_test.py` comment out line:
-```py
-gateway_client.attach_device(device_id)
-```
-and uncomment line:
-```py
-gateway_client.attach_device(device_id, device_private_key, device_key_algorithm)
-```
-Re-run the communication test script and verify the message goes all way through to Cloud Functions log
-```bash
-python device_com_test.py
-```
-## Switch back to association-only mode
-Through out rest of this workshop, we be using the `association-only` for the convenience of no need to provide key pair for every device created
-```bash
-gcloud beta iot devices update $GATEWAY_ID \
---region=$REGION \
---registry=$REGISTRY_ID \
---auth-method=association-only
-```
+## View Your udpates in Firestore
+Browse to Firestore...
+
+## Send information from Firestore
+This represents an app sending information
+
+# Secure your flow
+
+
