@@ -113,11 +113,24 @@ TODO - SIMULATOR
 Brows to [Cloud Functions Console](https://console.cloud.google.com/functions) and click on the `logging` function. Under 'logging' function click on `VIEW LOGS` to access the function log. Refresh the log and verify that connected message appears in the log.
 
 ## View Your udpates in Firestore
-Browse to Firestore...
+Go to Firestore in the GCP Console. Find your device in the devices list. 
+
+Try sending some data from the simulator - you should Firestore update instantly.
 
 ## Send information from Firestore
-This represents an app sending information
+This represents an app sending data down to devices. Usually an SDK would write from a mobile app to Firestore. 
+
+Also in the document for your device in Firestore, navigate to the config collection and try updating one of the fields under state.
+
+You should this information sent directly down to your device.
 
 # Secure your flow
+You can use Firebase to make sure that users can only read and update their own devices.
 
+## Create firestore rule
+```bash
+TODO
+```
 
+## Test secure communicaiton
+We have added an ACL field to the firestore document which can contain an email, if set only a user signed in with this email would be to udpate and view these fields.
