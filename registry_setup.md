@@ -155,4 +155,25 @@ You can also use the IoT Core event channel to send custom logs from the device 
 ```bash
 TODO
 ```
+## Try out custom logging
+Use the simulator to send a log
 
+```log INFO "testing"```
+
+Check to see if it appears in Stackdriver
+
+# Alerting on Logs
+It's easy to create systems which raise alarms when certain log events occur. Simply deploy a CF which watches Stackdriver.
+
+## Create cloud function to alert from stackdriver
+```bash
+TODO
+```
+
+# Agregate Monitoring
+IoT Core roles up certain monitoring data for you, in the GCP console.
+
+## View registry monitoring
+Go to your IoT Core registry and click on the monitoring tab - you should be able to see devices connect, bytes uysed, and more.
+
+----
