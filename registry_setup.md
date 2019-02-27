@@ -145,7 +145,16 @@ You can use Firebase to make sure that users can only read and update their own 
 
 ## Create firestore rule
 ```bash
-TODO
+{
+  "rules": {
+    "posts": {
+       "$uid": {
+         ".read": "$uid === auth.uid",
+         ".write": "$uid === auth.uid"
+       }
+     }
+   }
+}
 ```
 
 ## Test secure communicaiton
