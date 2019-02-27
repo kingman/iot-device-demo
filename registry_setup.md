@@ -198,7 +198,14 @@ Check to see if it appears in Stackdriver
 # Alerting on Logs
 It's easy to create systems which raise alarms when certain log events occur. Simply deploy a CF which watches Stackdriver.
 
-## Create cloud function to alert from stackdriver
+See the documentation here: https://cloud.google.com/logging/docs/export/
+
+We could export logs to BigQuery or to Pub/Sub. If to Pub/Sub we can make a simple function to alert on them.
+
+## Create Pub/Sub Sink
+Click on "Create Export" and Select Pub/Sub.
+
+## Create Cloud Function to Alert
 ```bash
 TODO
 ```
