@@ -95,7 +95,7 @@ Substitute the real project id with the `<project_id>` place holder in `index.js
 ```bash
 gcloud beta functions deploy eventUpdate \
 --region $REGION \
---trigger-topic $LOG_TOPIC \
+--trigger-topic $EVENT_TOPIC \
 --runtime nodejs8 \
 --memory 128mb
 ```
@@ -118,7 +118,12 @@ firebase deploy --only functions
 
 ## Create cloud function for propegating device creation
 ```bash
-TODO
+cd functions/create_firestore_device
+gcloud beta functions deploy onDeviceCreate \
+--region $REGION \
+--trigger-topic registration-events \
+--runtime nodejs8 \
+--memory 128mb
 ```
 
 # Start using the communications flow
