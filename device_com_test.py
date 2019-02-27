@@ -24,11 +24,12 @@ def main(argv):
     gateway_client.connect_to_server()
     gateway_client.subscribe_to_error_msg(gateway_id)
 
-    # gateway_client.attach_device(device_id)
-    gateway_client.attach_device(device_id, device_private_key, device_key_algorithm)
+    gateway_client.attach_device(device_id)
+    # gateway_client.attach_device(device_id, device_private_key, device_key_algorithm)
 
     payload = {}
     payload['connected'] = True
+    payload['severity'] = 'INFO'
     gateway_client.send_event(device_id,  json.dumps(payload), 'log')
 
     gateway_client.detach_device(device_id)

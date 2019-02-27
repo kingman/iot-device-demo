@@ -88,6 +88,10 @@ class MQTTClient(object):
         error_topic = '/devices/{}/errors'.format(device_id)
         self.client.subscribe(error_topic, qos=0)
 
+    def subscribe_to_config_update(self, device_id):
+        config_topic = '/devices/{}/config'.format(device_id)
+        self.client.subscribe(config_topic, qos=1);
+
     def connect_to_server(self):
         self.client.connect(self.mqtt_bridge_hostname, self.mqtt_bridge_port)
         self.connected = True
