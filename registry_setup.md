@@ -8,8 +8,8 @@ export LOG_TOPIC=lamp-log
 export STATE_TOPIC=lamp-state
 export REGISTRY_ID=<registry_id>
 export REGION=europe-west1
-export GATEWAY_ID=hub
-export DEVICE_PRE=lamp
+export GATEWAY_ID=hub123
+export DEVICE_PRE=lamp123
 export GATEWAY_PRIVATE_KEY=gateway_private.pem
 export GATEWAY_PUBLIC_KEY=gateway_public.pem
 export DEVICE_PRIVATE_KEY=device_private.pem
@@ -38,18 +38,25 @@ gcloud iot registries create $REGISTRY_ID \
 # Simulator Setup
 We will use a node.js device simulator. This will get it setup.
 
+## Pull the code and install dependencies
+```bash
+git pull 
+cd 
+npm install
+```
+
+Then see that its working correctly, even though we still need to configure
+```bash
+npm start --
+```
+
 ## Create Gateway key pair
 ```bash
 openssl genrsa -out $GATEWAY_PRIVATE_KEY 2048 && \
 openssl rsa -in $GATEWAY_PRIVATE_KEY \
 -pubout -out $GATEWAY_PUBLIC_KEY
 ```
-## Create Device key pair
-```bash
-openssl genrsa -out $DEVICE_PRIVATE_KEY 2048 && \
-openssl rsa -in $DEVICE_PRIVATE_KEY \
--pubout -out $DEVICE_PUBLIC_KEY
-```
+
 ## Create gateway where device connect through association
 ```bash
 gcloud iot devices create $GATEWAY_ID \
@@ -59,6 +66,7 @@ gcloud iot devices create $GATEWAY_ID \
 --public-key=path=$GATEWAY_PUBLIC_KEY,type=rsa-pem \
 --auth-method=association-only
 ```
+
 ## Create device without key and bind it to gateway
 ```bash
 gcloud iot devices create "${DEVICE_PRE}1" \
@@ -72,7 +80,47 @@ gcloud iot devices gateways bind \
 --gateway-region=$REGION \
 --gateway-registry=$REGISTRY_ID
 ```
-# TODO: KAVI - OTHER SETUP INSTRUCTIONS?
+## Setup the configuration files for your gateway simulator
+Create a file called `gateway-config.json` and paste in the following.
+
+Replace the project ID, region, registry ID, and device ID fields. Make sure you are using your "gateway" ID and keyfile from before.
+
+```
+{
+  "projectId": "PROJECT_ID",
+  "region": "REGION",
+  "registryId": "REGISTRY_ID",
+  "type": "gateway",
+  "deviceId": "DEVICE_ID[GATEWAY]",
+  "privateKeyFile": "./gateway_private.pem",
+  "algorithm": "RS256"
+}
+```
+
+## Setup the configuration files for your gateway client (device) simulator
+Create a file called `gateway-client-config.json` and paste in the following.
+
+Replace the project ID, region, registry ID, and device ID fields. Make sure you are using your "device_pre" ID from before.
+
+```
+{
+  "projectId": "PROJECT_ID",
+  "region": "REGION",
+  "registryId": "REGISTRY_ID",
+  "type": "gateway-client",
+  "deviceId": "DEVICE_ID",
+  "algorithm": "RS256"
+}
+```
+
+## Test your simulator
+Test the keys in the gateway simulator
+
+```bash
+npm start -- ./gateway-config.json
+```
+
+You should see messages about the MQTT connection.
 
 # Deploy Communication Glue
 We have several Cloud Functions which help pass messages between systems. Deploy these first.
@@ -131,6 +179,20 @@ gcloud beta functions deploy onDeviceCreate \
 ```
 
 # Start using the communications flow
+## Start your gateway simulator
+```bash
+npm start -- ./gateway-config.json
+```
+
+Once you see the simulator is connected, the gateway should be ready. You can run `help` to see more options. But lets get the other device runing first.
+
+## Start another simulator as the gateway client (device)
+```bash
+npm start -- ./gateway-client-config.json
+```
+
+A few things will happen when you do this. A new device will connect to the gateway on the local machine and the gateway will 'attach' this device. 
+
 ## Test communication flow
 ```bash
 TODO - SIMULATOR
@@ -226,3 +288,28 @@ IoT Core roles up certain monitoring data for you, in the GCP console.
 Go to your IoT Core registry and click on the monitoring tab - you should be able to see devices connect, bytes uysed, and more.
 
 ----
+
+# OTA Setup Instructions
+## Charbel to add
+
+
+
+----
+
+# Old Instrucitons - DO NOT USE
+
+## Create Device key pair
+```bash
+openssl genrsa -out $DEVICE_PRIVATE_KEY 2048 && \
+openssl rsa -in $DEVICE_PRIVATE_KEY \
+-pubout -out $DEVICE_PUBLIC_KEY
+```
+## Create gateway where device connect through association
+```bash
+gcloud iot devices create $GATEWAY_ID \
+--device-type=gateway \
+--region=$REGION \
+--registry=$REGISTRY_ID \
+--public-key=path=$GATEWAY_PUBLIC_KEY,type=rsa-pem \
+--auth-method=association-only
+```
