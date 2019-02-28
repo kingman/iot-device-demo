@@ -43,8 +43,8 @@ We will use a node.js device simulator. This will get it setup.
 
 ## Pull the code and install dependencies
 ```bash
-git pull 
-cd 
+git clone https://github.com/ionia-corporation/gcp-iot-simulator 
+cd gcp-iot-simulator
 npm install
 ```
 
