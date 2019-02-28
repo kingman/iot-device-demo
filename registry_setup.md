@@ -211,7 +211,9 @@ Browse to [Cloud Functions Console](https://console.cloud.google.com/functions) 
 ## View Your udpates in Firestore
 Go to Firestore in the GCP Console. Find your device in the devices list.
 
-Try sending some data from the simulator - you should Firestore update instantly.
+You shold see the same "test" field with the "hello world" value.
+
+Try updating one of the existing values.
 
 ## Send information from Firestore
 This represents an app sending data down to devices. Usually an SDK would write from a mobile app to Firestore.
@@ -286,11 +288,6 @@ We could export logs to BigQuery or to Pub/Sub. If to Pub/Sub we can make a simp
 
 ## Create Pub/Sub Sink
 Click on "Create Export" and Select Pub/Sub.
-
-## Create Cloud Function to Alert
-```bash
-TODO
-```
 
 # Agregate Monitoring
 IoT Core roles up certain monitoring data for you, in the GCP console.
