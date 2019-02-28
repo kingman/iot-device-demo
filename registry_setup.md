@@ -6,6 +6,7 @@ export PROJECT_ID=<project_id>
 export EVENT_TOPIC=lamp-event
 export LOG_TOPIC=lamp-log
 export STATE_TOPIC=lamp-state
+export REGISTRATION_TOPIC=registration-events
 export REGISTRY_ID=<registry_id>
 export REGION=europe-west1
 export GATEWAY_ID=hub123
@@ -25,7 +26,9 @@ Run these commands to get IoT Core and other GCP services setup
 gcloud pubsub topics create $LOG_TOPIC
 gcloud pubsub topics create $STATE_TOPIC
 gcloud pubsub topics create $EVENT_TOPIC
+gcloud pubsub topics create $REGISTRATION_TOPIC
 ```
+
 ## Create IoT Core registry from CLI - Use Cloud Shell
 ```bash
 gcloud iot registries create $REGISTRY_ID \
