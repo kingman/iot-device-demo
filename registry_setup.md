@@ -148,8 +148,6 @@ gcloud beta functions deploy eventUpdate \
 --memory 128mb
 ```
 
-
-
 ## Create cloud function for sending Firestore updates to device
 ```bash
 mkdir firestore_update
@@ -167,6 +165,9 @@ Deploy the function
 ```bash
 firebase deploy --only functions
 ```
+
+## Create a log export to track new devices
+Go to "Logging" in the console. Click "Create Export". Select "Cloud Pub/Sub". Select the "registration-event" pub/sub topic. 
 
 ## Create cloud function for propegating device creation
 ```bash
@@ -194,10 +195,15 @@ npm start -- ./gateway-client-config.json
 A few things will happen when you do this. A new device will connect to the gateway on the local machine and the gateway will 'attach' this device. 
 
 ## Test communication flow
+Publish a message from the end device, through the gateway.
+
+With your simulator running, do the following at the REPL.
 ```bash
-TODO - SIMULATOR
+event "test" "hello world"
 ```
-Brows to [Cloud Functions Console](https://console.cloud.google.com/functions) and click on the `logging` function. Under 'logging' function click on `VIEW LOGS` to access the function log. Refresh the log and verify that connected message appears in the log.
+You should see the publish in the console. Check the gateways tab, you should see it there as well.
+
+Browse to [Cloud Functions Console](https://console.cloud.google.com/functions) and click on the `logging` function. Under 'logging' function click on `VIEW LOGS` to access the function log. Refresh the log and verify that connected message appears in the log.
 
 ## View Your udpates in Firestore
 Go to Firestore in the GCP Console. Find your device in the devices list.
@@ -260,9 +266,11 @@ gcloud beta functions deploy monitorLogging \
 --memory 128mb
 ```
 ## Try out custom logging
-Use the simulator to send a log
+Use the simulator to send a log. Try the following in the log repl.
 
-```log INFO "testing"```
+```bash
+log INFO "testing"
+```
 
 Check to see if it appears in Stackdriver
 
