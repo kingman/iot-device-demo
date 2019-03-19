@@ -6,10 +6,11 @@ export PROJECT_ID=<project_id>
 export EVENT_TOPIC=lamp-event
 export LOG_TOPIC=lamp-log
 export STATE_TOPIC=lamp-state
+export REGISTRATION_TOPIC=registration-events
 export REGISTRY_ID=<registry_id>
 export REGION=europe-west1
-export GATEWAY_ID=hub
-export DEVICE_PRE=lamp
+export GATEWAY_ID=hub123
+export DEVICE_PRE=lamp123
 export GATEWAY_PRIVATE_KEY=gateway_private.pem
 export GATEWAY_PUBLIC_KEY=gateway_public.pem
 export DEVICE_PRIVATE_KEY=device_private.pem
@@ -25,7 +26,9 @@ Run these commands to get IoT Core and other GCP services setup
 gcloud pubsub topics create $LOG_TOPIC
 gcloud pubsub topics create $STATE_TOPIC
 gcloud pubsub topics create $EVENT_TOPIC
+gcloud pubsub topics create $REGISTRATION_TOPIC
 ```
+
 ## Create IoT Core registry from CLI - Use Cloud Shell
 ```bash
 gcloud iot registries create $REGISTRY_ID \
@@ -38,18 +41,25 @@ gcloud iot registries create $REGISTRY_ID \
 # Simulator Setup
 We will use a node.js device simulator. This will get it setup.
 
+## Pull the code and install dependencies
+```bash
+git clone https://github.com/ionia-corporation/gcp-iot-simulator 
+cd gcp-iot-simulator
+npm install
+```
+
+Then see that its working correctly, even though we still need to configure
+```bash
+npm start --
+```
+
 ## Create Gateway key pair
 ```bash
 openssl genrsa -out $GATEWAY_PRIVATE_KEY 2048 && \
 openssl rsa -in $GATEWAY_PRIVATE_KEY \
 -pubout -out $GATEWAY_PUBLIC_KEY
 ```
-## Create Device key pair
-```bash
-openssl genrsa -out $DEVICE_PRIVATE_KEY 2048 && \
-openssl rsa -in $DEVICE_PRIVATE_KEY \
--pubout -out $DEVICE_PUBLIC_KEY
-```
+
 ## Create gateway where device connect through association
 ```bash
 gcloud iot devices create $GATEWAY_ID \
@@ -59,6 +69,7 @@ gcloud iot devices create $GATEWAY_ID \
 --public-key=path=$GATEWAY_PUBLIC_KEY,type=rsa-pem \
 --auth-method=association-only
 ```
+
 ## Create device without key and bind it to gateway
 ```bash
 gcloud iot devices create "${DEVICE_PRE}1" \
@@ -72,7 +83,47 @@ gcloud iot devices gateways bind \
 --gateway-region=$REGION \
 --gateway-registry=$REGISTRY_ID
 ```
-# TODO: KAVI - OTHER SETUP INSTRUCTIONS?
+## Setup the configuration files for your gateway simulator
+Create a file called `gateway-config.json` and paste in the following.
+
+Replace the project ID, region, registry ID, and device ID fields. Make sure you are using your "gateway" ID and keyfile from before.
+
+```
+{
+  "projectId": "PROJECT_ID",
+  "region": "REGION",
+  "registryId": "REGISTRY_ID",
+  "type": "gateway",
+  "deviceId": "DEVICE_ID[GATEWAY]",
+  "privateKeyFile": "./gateway_private.pem",
+  "algorithm": "RS256"
+}
+```
+
+## Setup the configuration files for your gateway client (device) simulator
+Create a file called `gateway-client-config.json` and paste in the following.
+
+Replace the project ID, region, registry ID, and device ID fields. Make sure you are using your "device_pre" ID from before.
+
+```
+{
+  "projectId": "PROJECT_ID",
+  "region": "REGION",
+  "registryId": "REGISTRY_ID",
+  "type": "gateway-client",
+  "deviceId": "DEVICE_ID",
+  "algorithm": "RS256"
+}
+```
+
+## Test your simulator
+Test the keys in the gateway simulator
+
+```bash
+npm start -- ./gateway-config.json
+```
+
+You should see messages about the MQTT connection.
 
 # Deploy Communication Glue
 We have several Cloud Functions which help pass messages between systems. Deploy these first.
@@ -100,8 +151,6 @@ gcloud beta functions deploy eventUpdate \
 --memory 128mb
 ```
 
-
-
 ## Create cloud function for sending Firestore updates to device
 ```bash
 mkdir firestore_update
@@ -127,6 +176,9 @@ cd ..
 firebase deploy --only functions
 ```
 
+## Create a log export to track new devices
+Go to "Logging" in the console. Click "Create Export". Select "Cloud Pub/Sub". Select the "registration-event" pub/sub topic. 
+
 ## Create cloud function for propegating device creation
 ```bash
 cd functions/create_firestore_device
@@ -138,16 +190,37 @@ gcloud beta functions deploy onDeviceCreate \
 ```
 
 # Start using the communications flow
-## Test communication flow
+## Start your gateway simulator
 ```bash
-TODO - SIMULATOR
+npm start -- ./gateway-config.json
 ```
-Brows to [Cloud Functions Console](https://console.cloud.google.com/functions) and click on the `logging` function. Under 'logging' function click on `VIEW LOGS` to access the function log. Refresh the log and verify that connected message appears in the log.
+
+Once you see the simulator is connected, the gateway should be ready. You can run `help` to see more options. But lets get the other device runing first.
+
+## Start another simulator as the gateway client (device)
+```bash
+npm start -- ./gateway-client-config.json
+```
+
+A few things will happen when you do this. A new device will connect to the gateway on the local machine and the gateway will 'attach' this device. 
+
+## Test communication flow
+Publish a message from the end device, through the gateway.
+
+With your simulator running, do the following at the REPL.
+```bash
+event "test" "hello world"
+```
+You should see the publish in the console. Check the gateways tab, you should see it there as well.
+
+Browse to [Cloud Functions Console](https://console.cloud.google.com/functions) and click on the `logging` function. Under 'logging' function click on `VIEW LOGS` to access the function log. Refresh the log and verify that connected message appears in the log.
 
 ## View Your udpates in Firestore
 Go to Firestore in the GCP Console. Find your device in the devices list.
 
-Try sending some data from the simulator - you should Firestore update instantly.
+You shold see the same "test" field with the "hello world" value.
+
+Try updating one of the existing values.
 
 ## Send information from Firestore
 This represents an app sending data down to devices. Usually an SDK would write from a mobile app to Firestore.
@@ -205,9 +278,11 @@ gcloud beta functions deploy monitorLogging \
 --memory 128mb
 ```
 ## Try out custom logging
-Use the simulator to send a log
+Use the simulator to send a log. Try the following in the log repl.
 
-```log INFO "testing"```
+```bash
+log INFO "testing"
+```
 
 Check to see if it appears in Stackdriver
 
@@ -221,11 +296,6 @@ We could export logs to BigQuery or to Pub/Sub. If to Pub/Sub we can make a simp
 ## Create Pub/Sub Sink
 Click on "Create Export" and Select Pub/Sub.
 
-## Create Cloud Function to Alert
-```bash
-TODO
-```
-
 # Agregate Monitoring
 IoT Core roles up certain monitoring data for you, in the GCP console.
 
@@ -233,3 +303,28 @@ IoT Core roles up certain monitoring data for you, in the GCP console.
 Go to your IoT Core registry and click on the monitoring tab - you should be able to see devices connect, bytes uysed, and more.
 
 ----
+
+# OTA Setup Instructions
+## Charbel to add
+
+
+
+----
+
+# Old Instrucitons - DO NOT USE
+
+## Create Device key pair
+```bash
+openssl genrsa -out $DEVICE_PRIVATE_KEY 2048 && \
+openssl rsa -in $DEVICE_PRIVATE_KEY \
+-pubout -out $DEVICE_PUBLIC_KEY
+```
+## Create gateway where device connect through association
+```bash
+gcloud iot devices create $GATEWAY_ID \
+--device-type=gateway \
+--region=$REGION \
+--registry=$REGISTRY_ID \
+--public-key=path=$GATEWAY_PUBLIC_KEY,type=rsa-pem \
+--auth-method=association-only
+```
