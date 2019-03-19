@@ -112,11 +112,18 @@ firebase login
 firebase init functions
 cd functions
 npm install @google-cloud/iot@latest
-cd ..
 ```
-Override the `index.js`  functions with the one in this directory and also make sure to substitute `<project_d>`, `<registry>` and `<region>`
+Set function configurations
+```bash
+firebase functions:config:set \
+deviceStore.configDatabase="deviceConfig" \
+iotCore.projectId=$PROJECT_ID \
+iotCore.region=$REGION \
+iotCore.registry=$REGISTRY_ID
+```
 Deploy the function
 ```bash
+cd ..
 firebase deploy --only functions
 ```
 
