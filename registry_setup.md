@@ -43,7 +43,7 @@ We will use a node.js device simulator. This will get it setup.
 
 ## Pull the code and install dependencies
 ```bash
-git clone https://github.com/ionia-corporation/gcp-iot-simulator 
+git clone https://github.com/ionia-corporation/gcp-iot-simulator
 cd gcp-iot-simulator
 npm install
 ```
@@ -165,10 +165,10 @@ npm install @google-cloud/iot@latest
 Set function configurations
 ```bash
 firebase functions:config:set \
-deviceStore.configDatabase="deviceConfig" \
-iotCore.projectId=$PROJECT_ID \
-iotCore.region=$REGION \
-iotCore.registry=$REGISTRY_ID
+device.database.name="deviceConfig" \
+iot.core.projectid=$PROJECT_ID \
+iot.core.region=$REGION \
+iot.core.registry=$REGISTRY_ID
 ```
 Deploy the function
 ```bash
@@ -177,7 +177,7 @@ firebase deploy --only functions
 ```
 
 ## Create a log export to track new devices
-Go to "Logging" in the console. Click "Create Export". Select "Cloud Pub/Sub". Select the "registration-event" pub/sub topic. 
+Go to "Logging" in the console. Click "Create Export". Select "Cloud Pub/Sub". Select the "registration-event" pub/sub topic.
 
 ## Create cloud function for propegating device creation
 ```bash
@@ -202,7 +202,7 @@ Once you see the simulator is connected, the gateway should be ready. You can ru
 npm start -- ./gateway-client-config.json
 ```
 
-A few things will happen when you do this. A new device will connect to the gateway on the local machine and the gateway will 'attach' this device. 
+A few things will happen when you do this. A new device will connect to the gateway on the local machine and the gateway will 'attach' this device.
 
 ## Test communication flow
 Publish a message from the end device, through the gateway.
