@@ -155,12 +155,12 @@ gcloud beta functions deploy eventUpdate \
 ```bash
 mkdir firestore_update
 cd firestore_update
-npm install firebase-functions@latest firebase-admin@latest @google-cloud/iot@latest --save
 npm install -g firebase-tools
 firebase login
-firebase init functions
+firebase init functions --project $PROJECT_ID
 cd functions
-npm install @google-cloud/iot@latest
+cp ~/iot-device-demo/functions/firestore_update/index.js index.js
+npm install firebase-functions@latest firebase-admin@latest @google-cloud/iot@latest
 ```
 Set function configurations
 ```bash
