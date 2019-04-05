@@ -154,7 +154,7 @@ cd ~/iot-device-demo/functions/device_created
 gcloud functions deploy onDeviceCreated \
 --set-env-vars DEVICE_COLLECTION=devices,\
 DEVICE_CONFIG_COLLECTION=deviceConfigs \
---region ${REGION}\
+--region ${REGION} \
 --trigger-topic ${DEVICE_CREATED_TOPIC} \
 --runtime nodejs8 \
 --memory 128mb
