@@ -141,23 +141,24 @@ Create log sink that looks for device creation in the log and writes to the Pub/
 ```bash
 gcloud logging sinks create ${DEVICE_CREATED_SINK_ID} \
 pubsub.googleapis.com/projects/${PROJECT_ID}/topics/${DEVICE_CREATED_TOPIC} \
---log-filter='resource.type="cloudiot_device" AND \
-protoPayload.methodName="google.cloud.iot.v1.DeviceManager.CreateDevice"'
+--log-filter='resource.type="cloudiot_device" AND protoPayload.methodName="google.cloud.iot.v1.DeviceManager.CreateDevice"'
+```
+Give the service account right to publish to the newly created topic
+```bash
+export DEVICE_CREATED_SINK_ACCOUNT=$(gcloud logging sinks describe ${DEVICE_CREATED_SINK_ID} --format "value(writerIdentity)")
+gcloud beta pubsub topics add-iam-policy-binding ${DEVICE_CREATED_TOPIC} --member=${DEVICE_CREATED_SINK_ACCOUNT} --role=roles/pubsub.publisher
 ```
 Deploy Cloud Functions that listens to that topic and create corresponding document in firestore
 ```bash
 cd ~/iot-device-demo/functions/device_created
 gcloud functions deploy onDeviceCreated \
---set-env-vars DEVICE_STATE_COLLECTION=devics,DEVICE_CONFIG_COLLECTION=deviceConfigs
+--set-env-vars DEVICE_COLLECTION=devices,\
+DEVICE_CONFIG_COLLECTION=deviceConfigs \
 --region ${REGION}\
 --trigger-topic ${DEVICE_CREATED_TOPIC} \
 --runtime nodejs8 \
 --memory 128mb
 ```
-
-
-
-
 ## Create cloud function for debugging device activity
 ```bash
 cd functions/logging
@@ -331,6 +332,13 @@ IoT Core roles up certain monitoring data for you, in the GCP console.
 
 ## View registry monitoring
 Go to your IoT Core registry and click on the monitoring tab - you should be able to see devices connect, bytes uysed, and more.
+
+## Clean up
+```bash
+gcloud functions delete onDeviceCreated --region ${REGION} -q
+gcloud logging sinks delete ${DEVICE_CREATED_SINK_ID} -q
+gcloud pubsub topics delete ${DEVICE_CREATED_TOPIC} -q
+```
 
 ----
 
