@@ -2,7 +2,7 @@
 Following code are execute from the Cloud Shell
 ## Set environment variables
 ```bash
-export PROJECT_ID=<project_id>
+export PROJECT_ID=$(gcloud config list project --format "value(core.project)")
 export EVENT_TOPIC=lamp-event
 export LOG_TOPIC=lamp-log
 export STATE_TOPIC=lamp-state
@@ -127,6 +127,36 @@ You should see messages about the MQTT connection.
 
 # Deploy Communication Glue
 We have several Cloud Functions which help pass messages between systems. Deploy these first.
+
+## Device creation flow
+```bash
+export DEVICE_CREATED_TOPIC=iot-device-created
+export DEVICE_CREATED_SINK_ID=device-created-log-sink
+```
+Create PubSub topic that holds device created event
+```bash
+gcloud pubsub topics create ${DEVICE_CREATED_TOPIC}
+```
+Create log sink that looks for device creation in the log and writes to the Pub/Sub event
+```bash
+gcloud logging sinks create ${DEVICE_CREATED_SINK_ID} \
+pubsub.googleapis.com/projects/${PROJECT_ID}/topics/${DEVICE_CREATED_TOPIC} \
+--log-filter='resource.type="cloudiot_device" AND \
+protoPayload.methodName="google.cloud.iot.v1.DeviceManager.CreateDevice"'
+```
+Deploy Cloud Functions that listens to that topic and create corresponding document in firestore
+```bash
+cd ~/iot-device-demo/functions/device_created
+gcloud functions deploy onDeviceCreated \
+--set-env-vars DEVICE_STATE_COLLECTION=devics,DEVICE_CONFIG_COLLECTION=deviceConfigs
+--region ${REGION}\
+--trigger-topic ${DEVICE_CREATED_TOPIC} \
+--runtime nodejs8 \
+--memory 128mb
+```
+
+
+
 
 ## Create cloud function for debugging device activity
 ```bash
